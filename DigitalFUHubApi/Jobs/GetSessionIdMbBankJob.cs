@@ -2,6 +2,7 @@
 using DataAccess.DAOs;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.MbBank;
 using Quartz;
 
@@ -9,13 +10,15 @@ namespace DigitalFUHubApi.Jobs
 {
 	public class GetSessionIdMbBankJob : IJob
 	{
-		private readonly OpticalCharacterRecognitionService opticalCharacterRecognitionService;
+		private readonly CaptchaImageService captchaImageService;
+		private readonly ITextRecognitionService textRecognitionService;
 		private readonly MbBankService mbBankService;
 
-		public GetSessionIdMbBankJob(MbBankService mbBankService, OpticalCharacterRecognitionService opticalCharacterRecognitionService)
+		public GetSessionIdMbBankJob(MbBankService mbBankService, CaptchaImageService captchaImageService, ITextRecognitionService textRecognitionService)
 		{
 			this.mbBankService = mbBankService;
-			this.opticalCharacterRecognitionService = opticalCharacterRecognitionService;
+			this.captchaImageService = captchaImageService;
+			this.textRecognitionService = textRecognitionService;
 		}
 
 		public async Task Execute(IJobExecutionContext context)
@@ -42,7 +45,7 @@ namespace DigitalFUHubApi.Jobs
 				while (string.IsNullOrEmpty(base64CaptchaImage));
 
 				//login
-				var captchaRaw = opticalCharacterRecognitionService.ExtractTextFromImage(base64CaptchaImage).Trim();
+				var captchaRaw = captchaImageService.ExtractTextFromImage(base64CaptchaImage).Trim();
 				if (captchaRaw == null) return;
 
 				var captcha = String.Concat(captchaRaw.Where(c => !Char.IsWhiteSpace(c)));
@@ -59,7 +62,7 @@ namespace DigitalFUHubApi.Jobs
 			*/
 			#endregion
 
-			#region Azure Computer Vision
+			#region Cloud text recognition (Azure Computer Vision / AWS Rekognition, see "Cloud" in appsettings.json)
 			do
 			{
 				//get captcha
@@ -78,10 +81,10 @@ namespace DigitalFUHubApi.Jobs
 				//login
 				try
 				{
-					byte[]? captchaImageStream = opticalCharacterRecognitionService.GetClarifyCaptchaImageByBase64(base64CaptchaImage);
+					byte[]? captchaImageStream = captchaImageService.GetClarifyCaptchaImageByBase64(base64CaptchaImage);
 					if(captchaImageStream == null) continue;	
 
-					var captchaRaw = await opticalCharacterRecognitionService.ExtractTextFromImageAzureComputerVision(captchaImageStream);
+					var captchaRaw = await textRecognitionService.ExtractTextAsync(captchaImageStream);
 					if (captchaRaw == null) return;
 
 					var captcha = String.Concat(captchaRaw.Where(c => !Char.IsWhiteSpace(c)));

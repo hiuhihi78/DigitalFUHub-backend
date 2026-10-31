@@ -5,6 +5,7 @@ using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.Product;
 using DTOs.Seller;
 using DTOs.Shop;
@@ -24,7 +25,7 @@ namespace DigitalFUHubApi.Controllers
 		private readonly IShopRepository _shopRepository;
 		private readonly IUserRepository _userRepository;
 		private readonly JwtTokenService _jwtTokenService;
-		private readonly AzureStorageAccountService _azureStorageAccountService;
+		private readonly IFileStorageService _fileStorageService;
 		private readonly MailService _mailService;
 		private readonly HubService _hubService;
 
@@ -33,7 +34,7 @@ namespace DigitalFUHubApi.Controllers
 		public ShopsController(IShopRepository shopRepository, 
 			IUserRepository userRepository, 
 			JwtTokenService jwtTokenService, 
-			AzureStorageAccountService azureStorageAccountService, 
+			IFileStorageService fileStorageService, 
 			MailService mailService,
 			HubService hubService,
 			IMapper mapper)
@@ -41,7 +42,7 @@ namespace DigitalFUHubApi.Controllers
 			_shopRepository = shopRepository;
 			_userRepository = userRepository;
 			_jwtTokenService = jwtTokenService;
-			_azureStorageAccountService = azureStorageAccountService;
+			_fileStorageService = fileStorageService;
 			_mailService = mailService;
 			_hubService = hubService;
 			_mapper = mapper;
@@ -131,7 +132,7 @@ namespace DigitalFUHubApi.Controllers
 				string filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day,
 					now.Millisecond, now.Second, now.Minute, now.Hour,
 					request.AvatarFile.FileName.Substring(request.AvatarFile.FileName.LastIndexOf(".")));
-				string avatarUrl = await _azureStorageAccountService.UploadFileToAzureAsync(request.AvatarFile, filename);
+				string avatarUrl = await _fileStorageService.UploadFileAsync(request.AvatarFile, filename);
 				_shopRepository.AddShop(avatarUrl, request.ShopName.Trim(), request.UserId, request.ShopDescription.Trim());
 				string html = $"<div>" +
 					$"<h3>Xin chào {user.Fullname},</h3>" +
@@ -197,7 +198,7 @@ namespace DigitalFUHubApi.Controllers
 					string filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day,
 						now.Millisecond, now.Second, now.Minute, now.Hour,
 						request.AvatarFile.FileName.Substring(request.AvatarFile.FileName.LastIndexOf(".")));
-					avatarUrl = await _azureStorageAccountService.UploadFileToAzureAsync(request.AvatarFile, filename);
+					avatarUrl = await _fileStorageService.UploadFileAsync(request.AvatarFile, filename);
 				}
 				Shop shopEdit = new Shop
 				{

@@ -5,6 +5,7 @@ using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.Slider;
 using DTOs.WishList;
 using Microsoft.AspNetCore.Authorization;
@@ -19,14 +20,14 @@ namespace DigitalFUHubApi.Controllers
     {
         private readonly ISliderRepository sliderRepository;
         private readonly IProductRepository productRepository;
-        private readonly AzureStorageAccountService azureStorageAccountService;
+        private readonly IFileStorageService fileStorageService;
         private readonly IMapper mapper;
 
-        public SlidersController(ISliderRepository sliderRepository, IProductRepository productRepository, AzureStorageAccountService azureStorageAccountService, IMapper mapper)
+        public SlidersController(ISliderRepository sliderRepository, IProductRepository productRepository, IFileStorageService fileStorageService, IMapper mapper)
         {
             this.sliderRepository = sliderRepository;
             this.productRepository = productRepository;
-            this.azureStorageAccountService = azureStorageAccountService;
+            this.fileStorageService = fileStorageService;
             this.mapper = mapper;
         }
 
@@ -143,7 +144,7 @@ namespace DigitalFUHubApi.Controllers
                 // Upload file to azure
                 now = DateTime.Now;
                 filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", Constants.ADMIN_USER_ID, now.Year, now.Month, now.Day, now.Millisecond, now.Second, now.Minute, now.Hour, fileRequest.FileName.Substring(fileRequest.FileName.LastIndexOf(".")));
-                urlImage = await azureStorageAccountService.UploadFileToAzureAsync(fileRequest, filename);
+                urlImage = await fileStorageService.UploadFileAsync(fileRequest, filename);
 
                 // Initial New Slider
                 Slider slider = new Slider
@@ -246,7 +247,7 @@ namespace DigitalFUHubApi.Controllers
                     // Upload file to azure
                     now = DateTime.Now;
                     filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", Constants.ADMIN_USER_ID, now.Year, now.Month, now.Day, now.Millisecond, now.Second, now.Minute, now.Hour, fileRequest.FileName.Substring(fileRequest.FileName.LastIndexOf(".")));
-                    urlImage = await azureStorageAccountService.UploadFileToAzureAsync(fileRequest, filename);
+                    urlImage = await fileStorageService.UploadFileAsync(fileRequest, filename);
 
                     string urlOld = slider.Url;
 
@@ -254,7 +255,7 @@ namespace DigitalFUHubApi.Controllers
                     slider.Url = urlImage;
 
                     // delete url old
-                    await azureStorageAccountService.RemoveFileFromAzureAsync(urlOld.Substring(urlOld.LastIndexOf("/") + 1));
+                    await fileStorageService.RemoveFileAsync(urlOld);
                 }
 
                 // Update slider

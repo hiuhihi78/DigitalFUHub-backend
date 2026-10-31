@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using BusinessObject.Entities;
 using Comons;
 using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.Coupon;
 using DTOs.Feedback;
 using DTOs.Product;
@@ -26,17 +26,17 @@ namespace DigitalFUHubApi.Controllers
 	{
 		private readonly IProductRepository _productRepository;
 		private readonly IShopRepository _shopRepository;
-		private readonly AzureStorageAccountService _azureStorageAccountService;
+		private readonly IFileStorageService _fileStorageService;
 		private readonly JwtTokenService _jwtTokenService;
 		private readonly HubService _hubService;
 		private readonly MailService _mailService;
 		private readonly ICouponRepository _couponRepository;
 		private readonly IMapper _mapper;
 
-		public ProductsController(IProductRepository productRepository, IShopRepository shopRepository, AzureStorageAccountService azureStorageAccountService, JwtTokenService jwtTokenService, HubService hubService, MailService mailService, IMapper mapper, ICouponRepository couponRepository)
+		public ProductsController(IProductRepository productRepository, IShopRepository shopRepository, IFileStorageService fileStorageService, JwtTokenService jwtTokenService, HubService hubService, MailService mailService, IMapper mapper, ICouponRepository couponRepository)
 		{
 			_productRepository = productRepository;
-			_azureStorageAccountService = azureStorageAccountService;
+			_fileStorageService = fileStorageService;
 			_shopRepository = shopRepository;
 			_jwtTokenService = jwtTokenService;
 			_hubService = hubService;
@@ -300,7 +300,7 @@ namespace DigitalFUHubApi.Controllers
 				{
 					now = DateTime.Now;
 					filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day, now.Millisecond, now.Second, now.Minute, now.Hour, file.FileName.Substring(file.FileName.LastIndexOf(".")));
-					string url = await _azureStorageAccountService.UploadFileToAzureAsync(file, filename);
+					string url = await _fileStorageService.UploadFileAsync(file, filename);
 					productMedias.Add(new ProductMedia
 					{
 						Url = url
@@ -311,7 +311,7 @@ namespace DigitalFUHubApi.Controllers
 				filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day,
 					now.Millisecond, now.Second, now.Minute, now.Hour,
 					request.ThumbnailFile.FileName.Substring(request.ThumbnailFile.FileName.LastIndexOf(".")));
-				string urlThumbnail = await _azureStorageAccountService.UploadFileToAzureAsync(request.ThumbnailFile, filename);
+				string urlThumbnail = await _fileStorageService.UploadFileAsync(request.ThumbnailFile, filename);
 
 				Product product = new Product()
 				{
@@ -432,7 +432,7 @@ namespace DigitalFUHubApi.Controllers
 						filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day,
 							now.Millisecond, now.Second, now.Minute, now.Hour, file.FileName.Substring(file.FileName.LastIndexOf(".")));
 						// upload to azure
-						string url = await _azureStorageAccountService.UploadFileToAzureAsync(file, filename);
+						string url = await _fileStorageService.UploadFileAsync(file, filename);
 						listProductDetailImagesAddNew.Add(new ProductMedia
 						{
 							ProductId = request.ProductId,
@@ -505,7 +505,7 @@ namespace DigitalFUHubApi.Controllers
 						.Where(x => !request.ProductDetailImagesCurrent.Any(m => m == x.Url)).ToList();
 					foreach (ProductMedia image in productDetailImagesDelete)
 					{
-						await _azureStorageAccountService.RemoveFileFromAzureAsync(image.Url.Substring(image.Url.LastIndexOf("/") + 1));
+						await _fileStorageService.RemoveFileAsync(image.Url);
 					}
 				}
 
@@ -518,12 +518,12 @@ namespace DigitalFUHubApi.Controllers
 					filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month,
 						now.Day, now.Millisecond, now.Second, now.Minute, now.Hour,
 						request.ProductThumbnailFileUpdate.FileName.Substring(request.ProductThumbnailFileUpdate.FileName.LastIndexOf(".")));
-					urlThumbnailNew = await _azureStorageAccountService.UploadFileToAzureAsync(request.ProductThumbnailFileUpdate, filename);
+					urlThumbnailNew = await _fileStorageService.UploadFileAsync(request.ProductThumbnailFileUpdate, filename);
 
 					// delete product thumbnail old
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-					await _azureStorageAccountService.RemoveFileFromAzureAsync(prod.Thumbnail.Substring(prod.Thumbnail.LastIndexOf("/") + 1));
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8604 // Possible null reference argument.
+					await _fileStorageService.RemoveFileAsync(prod.Thumbnail);
+#pragma warning restore CS8604 // Possible null reference argument.
 				}
 
 				Product product = new Product

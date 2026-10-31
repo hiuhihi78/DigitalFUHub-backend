@@ -5,6 +5,7 @@ using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.Feedback;
 using DTOs.Seller;
 using Microsoft.AspNetCore.Authorization;
@@ -20,15 +21,15 @@ namespace DigitalFUHubApi.Controllers
 	{
 		private readonly IOrderRepository _orderRepository;
 		private readonly IFeedbackRepository _feedbackRepository;
-		private readonly AzureStorageAccountService _azureStorageAccountService;
+		private readonly IFileStorageService _fileStorageService;
 		private readonly JwtTokenService _jwtTokenService;
 		private readonly IMapper _mapper;
 
-		public FeedbacksController(IOrderRepository orderRepository, IFeedbackRepository feedbackRepository, AzureStorageAccountService azureStorageAccountService, JwtTokenService jwtTokenService, IMapper mapper)
+		public FeedbacksController(IOrderRepository orderRepository, IFeedbackRepository feedbackRepository, IFileStorageService fileStorageService, JwtTokenService jwtTokenService, IMapper mapper)
 		{
 			_orderRepository = orderRepository;
 			_feedbackRepository = feedbackRepository;
-			_azureStorageAccountService = azureStorageAccountService;
+			_fileStorageService = fileStorageService;
 			_jwtTokenService = jwtTokenService;
 			_mapper = mapper;
 		}
@@ -130,7 +131,7 @@ namespace DigitalFUHubApi.Controllers
 					{
 						now = DateTime.Now;
 						filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day, now.Millisecond, now.Second, now.Minute, now.Hour, file.FileName.Substring(file.FileName.LastIndexOf(".")));
-						string path = await _azureStorageAccountService.UploadFileToAzureAsync(file, filename);
+						string path = await _fileStorageService.UploadFileAsync(file, filename);
 						urlImages.Add(path);
 					}
 				}

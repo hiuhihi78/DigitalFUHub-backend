@@ -10,9 +10,9 @@ namespace BusinessObject
 	public class DatabaseContext : DbContext
 	{
 
-		public readonly string connectionString = "server=localhost; database=DigitalFuHub; uid=sa; pwd=sa;MultipleActiveResultSets=true";
-
-		//public readonly string connectionString = "Server=tcp:digitalfuhub-server.database.windows.net,1433;Initial Catalog=digitalfuhub;Persist Security Info=False;User ID=digitalfuhub;Password=A0336687454a;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+		// Set once at startup (Program.cs) from "{Cloud}:DbConnectionString" / ConnectionStrings:DB,
+		// used by DAOs that create the context with the parameterless constructor
+		public static string ConnectionString { get; set; } = string.Empty;
 
 		public DatabaseContext() { }
 
@@ -70,7 +70,15 @@ namespace BusinessObject
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlServer(connectionString).EnableSensitiveDataLogging(true).LogTo(Console.WriteLine);
+			if (!optionsBuilder.IsConfigured)
+			{
+				if (string.IsNullOrWhiteSpace(ConnectionString))
+				{
+					throw new InvalidOperationException("DatabaseContext.ConnectionString has not been set.");
+				}
+				optionsBuilder.UseSqlServer(ConnectionString);
+			}
+			optionsBuilder.EnableSensitiveDataLogging(true).LogTo(Console.WriteLine);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

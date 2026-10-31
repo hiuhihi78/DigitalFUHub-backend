@@ -10,7 +10,7 @@
 	using DigitalFUHubApi.Hubs;
 	using DigitalFUHubApi.Managers;
 	using DigitalFUHubApi.Services;
-	using Microsoft.Extensions.Azure;
+	using DigitalFUHubApi.Services.Cloud;
 	using BusinessObject.Entities;
 	using DTOs.User;
 	using System.Net;
@@ -20,7 +20,6 @@
 	using DTOs.Seller;
 	using DataAccess.Repositories;
 	using DTOs.Admin;
-	using Azure.Core;
 	using Quartz.Util;
 	using System.Text.RegularExpressions;
 
@@ -38,7 +37,7 @@
 		private readonly JwtTokenService _jwtTokenService;
 		private readonly TwoFactorAuthenticationService _twoFactorAuthenticationService;
 		private readonly MailService _mailService;
-		private readonly AzureStorageAccountService _azureStorageAccountService;
+		private readonly IFileStorageService _fileStorageService;
 
 		public UsersController(IUserRepository userRepository, IMapper mapper,
 			IConfiguration configuration,
@@ -48,7 +47,7 @@
 			JwtTokenService jwtTokenService,
 			TwoFactorAuthenticationService twoFactorAuthenticationService,
 			MailService mailService,
-			AzureStorageAccountService azureStorageAccountService
+			IFileStorageService fileStorageService
 			)
 		{
 			_userRepository = userRepository;
@@ -59,7 +58,7 @@
 			_twoFactorAuthenticationService = twoFactorAuthenticationService;
 			_twoFactorAuthenticationRepository = twoFactorAuthenticationRepository;
 			_mailService = mailService;
-			_azureStorageAccountService = azureStorageAccountService;
+			_fileStorageService = fileStorageService;
 			_configuration = configuration;
 
 		}
@@ -673,11 +672,11 @@
 						now.Day, now.Millisecond, now.Second, now.Minute, now.Hour,
 						request.Avatar.FileName.Substring(request.Avatar.FileName.LastIndexOf(".")));
 
-					urlNewAvatar = await _azureStorageAccountService.UploadFileToAzureAsync(request.Avatar, filename);
+					urlNewAvatar = await _fileStorageService.UploadFileAsync(request.Avatar, filename);
 					userUpdate.Avatar = urlNewAvatar;
 
 					// delete avatar old
-					await _azureStorageAccountService.RemoveFileFromAzureAsync(user.Avatar.Substring(user.Avatar.LastIndexOf("/") + 1));
+					await _fileStorageService.RemoveFileAsync(user.Avatar);
 				}
 
 				// Ok
@@ -759,12 +758,12 @@
 					now.Day, now.Millisecond, now.Second, now.Minute, now.Hour,
 					request.Avatar.FileName.Substring(request.Avatar.FileName.LastIndexOf(".")));
 
-				urlNewAvatar = await _azureStorageAccountService.UploadFileToAzureAsync(request.Avatar, filename);
+				urlNewAvatar = await _fileStorageService.UploadFileAsync(request.Avatar, filename);
 				string urlOld = user.Avatar;
 				user.Avatar = urlNewAvatar;
 
 				// delete avatar old
-				await _azureStorageAccountService.RemoveFileFromAzureAsync(urlOld.Substring(urlOld.LastIndexOf("/") + 1));
+				await _fileStorageService.RemoveFileAsync(urlOld);
 
 				// Ok
 				_userRepository.UpdateSettingPersonalInfo(user);

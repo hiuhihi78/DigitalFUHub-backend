@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
-using Azure.Core;
 using BusinessObject.Entities;
 using Comons;
 using DataAccess.IRepositories;

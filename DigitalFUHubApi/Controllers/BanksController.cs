@@ -15,7 +15,6 @@ using Microsoft.Data.SqlClient.Server;
 using Comons;
 using System.Transactions;
 using DTOs.Admin;
-using Azure.Core;
 using OfficeOpenXml.Style;
 
 namespace DigitalFUHubApi.Controllers

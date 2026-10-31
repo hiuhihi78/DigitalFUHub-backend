@@ -1,7 +1,6 @@
 ﻿using Comons;
 using DigitalFUHubApi.Comons;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.Extensions.Azure;
 using System;
 using System.Drawing;
 using System.Net.Http.Headers;
@@ -9,24 +8,16 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
-using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
-using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
-using Azure;
 using System.IO;
 
 
 namespace DigitalFUHubApi.Services
 {
-	public class OpticalCharacterRecognitionService
+	/// <summary>
+	/// Cloud-independent captcha image pre-processing. Text extraction is done by ITextRecognitionService.
+	/// </summary>
+	public class CaptchaImageService
 	{
-		private IConfiguration Configuration;
-
-		public OpticalCharacterRecognitionService(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
-
-
 		#region Clarify image
 		public void ClarifyImage(string base64)
 		{
@@ -136,40 +127,6 @@ namespace DigitalFUHubApi.Services
 			}
 		}
 		*/
-		#endregion
-
-		#region Extract text from image - Azure Computer Vision
-		public async Task<string> ExtractTextFromImageAzureComputerVision(byte[] bytes)
-		{
-			var imageStream = new MemoryStream(bytes);
-
-			ApiKeyServiceClientCredentials visionCredentials =
-				new(Configuration[Constants.AZURE_COMPUTER_VISION_SUBSCRIPTION_KEY]);
-			ComputerVisionClient client = new ComputerVisionClient(visionCredentials);
-			client.Endpoint = Configuration[Constants.AZURE_COMPUTER_VISION_ENDPOINT];
-
-			ReadOperationResult results;
-
-			ReadInStreamHeaders textHeaders = await client.ReadInStreamAsync(imageStream);
-			string operationLocation = textHeaders.OperationLocation;
-			string operationId = operationLocation[^36..];
-			do
-			{
-				results = await client.GetReadResultAsync(Guid.Parse(operationId));
-			}
-			while ((results.Status == OperationStatusCodes.Running || results.Status == OperationStatusCodes.NotStarted));
-			IList<ReadResult> textUrlFileResults = results.AnalyzeResult.ReadResults;
-
-			StringBuilder sb = new();
-			foreach (ReadResult page in textUrlFileResults)
-			{
-				foreach (Line line in page.Lines)
-				{
-					sb.AppendLine(line.Text);
-				}
-			}
-			return string.Join(Environment.NewLine, sb).Trim();
-		}
 		#endregion
 	}
 }

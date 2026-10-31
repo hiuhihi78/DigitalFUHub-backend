@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using BusinessObject.Entities;
+﻿using BusinessObject.Entities;
 using Comons;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;

@@ -6,6 +6,7 @@ using AutoMapper;
 using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Hubs;
 using AspNetCoreRateLimit;
@@ -30,10 +31,11 @@ namespace DigitalFUHubApi
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
-			// Add database
+			// Add database ("{Cloud}:DbConnectionString", fallback ConnectionStrings:DB)
+			DatabaseContext.ConnectionString = CloudServiceCollectionExtensions.GetDbConnectionString(builder.Configuration);
 			builder.Services.AddDbContext<DatabaseContext>(opts =>
 			{
-				opts.UseSqlServer(builder.Configuration.GetConnectionString("DB") ?? string.Empty);
+				opts.UseSqlServer(DatabaseContext.ConnectionString);
 			});
 
 			// Add HttpContextAccessor 
@@ -138,8 +140,10 @@ namespace DigitalFUHubApi
 			builder.Services.AddSingleton<TwoFactorAuthenticationService>();
 			builder.Services.AddSingleton<MailService>();
 			builder.Services.AddSingleton<MbBankService>();
-			builder.Services.AddSingleton<AzureStorageAccountService>();
-			builder.Services.AddSingleton<OpticalCharacterRecognitionService>();
+			builder.Services.AddSingleton<CaptchaImageService>();
+
+			// Cloud provider (IFileStorageService, ITextRecognitionService) selected by "Cloud" in appsettings.json
+			builder.Services.AddCloudServices(builder.Configuration);
 
 			//Add SignalR
 			builder.Services.AddSignalR(c =>
@@ -289,4 +293,4 @@ namespace DigitalFUHubApi
 			app.Run();
 		}
 	}
-}
+}

@@ -121,13 +121,10 @@ namespace Comons
 
 		public const int MIN_SELLER_REGISTRATION_FEE = 10000;
 
-		//Azure
-		private const string AZURE = "Azure";
-		public const string AZURE_COMPUTER_VISION_ENDPOINT = $"{AZURE}:ComputerVisonEndpoint";
-		public const string AZURE_COMPUTER_VISION_SUBSCRIPTION_KEY = $"{AZURE}:ComputerVisonSubcriptionKey";
-		public const string AZURE_STORAGE_END_POINT = $"{AZURE}:StorageEndPoint";
-		public const string AZURE_STORAGE_CONNECTION_STRING = $"{AZURE}:StorageConnectionString";
-		public const string AZURE_STORAGE_CONTAINER_NAME = $"{AZURE}:StorageContainerName";
+		//Cloud provider config sections ("Cloud": "Azure" | "AWS")
+		public const string CLOUD = "Cloud";
+		public const string AZURE = "Azure";
+		public const string AWS = "AWS";
 
 		// Product Status
 		public const int PRODUCT_STATUS_ALL = 0;

@@ -8,8 +8,7 @@ using DataAccess.Repositories;
 using BusinessObject.Entities;
 using DTOs.Conversation;
 using DigitalFUHubApi.Services;
-using Azure.Core;
-using Azure;
+using DigitalFUHubApi.Services.Cloud;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Collections.Generic;
 using DTOs.UserConversation;
@@ -30,19 +29,19 @@ namespace DigitalFUHubApi.Controllers
         private readonly IConnectionManager connectionManager;
         private readonly IConversationRepository conversationRepository;
         private readonly IMapper mapper;
-        private readonly AzureStorageAccountService azureStorageAccountService;
+        private readonly IFileStorageService fileStorageService;
         private readonly IUserRepository userRepository;
         private readonly IUserConversationRepository userConversationRepository;
         private readonly JwtTokenService jwtTokenService;
         private readonly IShopRepository shopRepository;
 
-        public ConversationsController(IHubContext<ChatHub> hubContext, JwtTokenService jwtTokenService, IConnectionManager connectionManager, IConversationRepository conversationRepository, IMapper mapper, AzureStorageAccountService azureStorageAccountService, IUserRepository userRepository, IUserConversationRepository userConversationRepository, IShopRepository shopRepository)
+        public ConversationsController(IHubContext<ChatHub> hubContext, JwtTokenService jwtTokenService, IConnectionManager connectionManager, IConversationRepository conversationRepository, IMapper mapper, IFileStorageService fileStorageService, IUserRepository userRepository, IUserConversationRepository userConversationRepository, IShopRepository shopRepository)
         {
             this.hubContext = hubContext;
             this.connectionManager = connectionManager;
             this.conversationRepository = conversationRepository;
             this.mapper = mapper;
-            this.azureStorageAccountService = azureStorageAccountService;
+            this.fileStorageService = fileStorageService;
             this.userRepository = userRepository;
             this.userConversationRepository = userConversationRepository;
             this.jwtTokenService = jwtTokenService;
@@ -125,7 +124,7 @@ namespace DigitalFUHubApi.Controllers
                     // Upload file to azure
                     now = DateTime.Now;
                     filename = string.Format("{0}_{1}{2}{3}{4}{5}{6}{7}{8}", request.UserId, now.Year, now.Month, now.Day, now.Millisecond, now.Second, now.Minute, now.Hour, fileRequest.FileName.Substring(fileRequest.FileName.LastIndexOf(".")));
-                    urlImage = await azureStorageAccountService.UploadFileToAzureAsync(fileRequest, filename);
+                    urlImage = await fileStorageService.UploadFileAsync(fileRequest, filename);
                 }
 
                 // Declares variable
@@ -387,4 +386,4 @@ namespace DigitalFUHubApi.Controllers
 		}
 		#endregion
 	}
-}
+}

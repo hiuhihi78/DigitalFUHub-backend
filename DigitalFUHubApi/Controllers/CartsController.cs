@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.SignalR;
 using Comons;
 using DataAccess.DAOs;
 using DataAccess.Repositories;
-using Azure.Core;
 using DigitalFUHubApi.Services;
 
 namespace DigitalFUHubApi.Controllers

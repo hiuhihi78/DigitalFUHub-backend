@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using Comons;
 using DataAccess.IRepositories;
 using DigitalFUHubApi.Comons;

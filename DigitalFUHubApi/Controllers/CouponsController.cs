@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
-using Azure;
-using Azure.Core;
 using BusinessObject.Entities;
 using Comons;
 using DataAccess.IRepositories;
 using DataAccess.Repositories;
 using DigitalFUHubApi.Comons;
 using DigitalFUHubApi.Services;
+using DigitalFUHubApi.Services.Cloud;
 using DTOs.Coupon;
 using DTOs.Seller;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +21,7 @@ namespace DigitalFUHubApi.Controllers
 	{
 		private readonly IConfiguration _configuration;
 		private readonly IProductRepository _productRepository;
-		private readonly AzureStorageAccountService _azureStorageAccountService;
+		private readonly IFileStorageService _fileStorageService;
 		private readonly IShopRepository _shopRepository;
 		private readonly IUserRepository _userRepository;
 		private readonly IRoleRepository _roleRepository;
@@ -33,7 +32,7 @@ namespace DigitalFUHubApi.Controllers
 
 		public CouponsController(IConfiguration configuration,
 			IProductRepository productRepository,
-			AzureStorageAccountService azureStorageAccountService,
+			IFileStorageService fileStorageService,
 			IShopRepository shopRepository,
 			IUserRepository userRepository,
 			IRoleRepository roleRepository,
@@ -44,7 +43,7 @@ namespace DigitalFUHubApi.Controllers
 		{
 			_configuration = configuration;
 			_productRepository = productRepository;
-			_azureStorageAccountService = azureStorageAccountService;
+			_fileStorageService = fileStorageService;
 			_shopRepository = shopRepository;
 			_userRepository = userRepository;
 			_roleRepository = roleRepository;
