@@ -1,30 +1,8 @@
-#Build files
-**/BusinessObject/bin/
-
-**/DataAccess/bin/
-
-**/DigitalFUHubApi/bin/
-
-**/DTOs/bin/
-
-
-# ASP.NET artifacts
-*.suo
-*.user
-*.sln.docstates
-bin/
-obj/
-
-# Visual Studio files
-.vscode/
-.vs/
-
-# User-specific files
-*.suo
-*.user
-*.sln.docstates
-
-# Compiled files
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
 *.dll
 *.exe
 *.pdb
@@ -33,52 +11,27 @@ obj/
 
 # NuGet packages
 packages/
+*.nupkg
 
-# User-specific files
-*.suo
-*.user
-*.sln.docstates
-
-# User-specific files (MonoDevelop/Xamarin Studio)
-*.userprefs
-
-# Mono Auto Generated Files
-mono_crash.*
-
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
-Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Visual Studio files
+# Visual Studio / IDE files
+.vs/
+.vs2019/
 .vscode/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
+.idea/
 *.suo
 *.user
 *.userosscache
-*.sln.docstates
-*.suo
-*.user
-*.sln.docstates
-
-# Rider
-.idea/
-
-# User-specific files
-*.suo
-*.user
-*.sln.docstates
-
-# User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
+*.sln.docstates
+*.ntvs*
+*.njsproj
+*.sln
 
-# Visual Studio 2019
-.vs2019/
+# Mono auto generated files
+mono_crash.*
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
