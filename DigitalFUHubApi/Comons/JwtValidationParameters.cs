@@ -10,6 +10,7 @@ namespace DigitalFUHubApi.Comons
 			var configuration = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
 				.AddJsonFile("appsettings.json", true, true)
+				.AddEnvironmentVariables()
 				.Build();
 
 			ValidateIssuer = false;
