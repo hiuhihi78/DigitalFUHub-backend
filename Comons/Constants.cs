@@ -29,7 +29,7 @@ namespace Comons
 		public const string MB_BANK_BASIC_AUTH_PASSWORD = "SD234dfg34%#@FG@34sfsdf45843f"; //BasicAuthPassword
 		public const string MB_BANK_BASIC_AUTH_BASE64 = "RU1CUkVUQUlMV0VCOlNEMjM0ZGZnMzQlI0BGR0AzNHNmc2RmNDU4NDNm"; //BasicAuthBase64
 
-		public const string MB_BANK_API_GET_CAPTCHA_IMAGE = "https://online.mbbank.com.vn/api/retail-web-internetbankingms/getCaptchaImage";
+		public const string MB_BANK_API_GET_CAPTCHA_IMAGE = "https://online.mbbank.com.vn/api/retail-internetbankingms/getCaptchaImage";
 		public const string MB_BANK_API_LOGIN = "https://online.mbbank.com.vn/api/retail_web/internetbanking/doLogin";
 		public const string MB_BANK_API_HISTORY_TRANSACTION = "https://online.mbbank.com.vn/api/retail-transactionms/transactionms/get-account-transaction-history";
 		public const string MB_BANK_API_INQUIRY_ACCOUNT_NAME = "https://online.mbbank.com.vn/api/retail_web/transfer/inquiryAccountName";
@@ -125,6 +125,9 @@ namespace Comons
 		public const string CLOUD = "Cloud";
 		public const string AZURE = "Azure";
 		public const string AWS = "AWS";
+
+		//Quartz jobs config section
+		public const string JOBS = "Jobs";
 
 		// Product Status
 		public const int PRODUCT_STATUS_ALL = 0;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>DigitalFUHubApi</AssemblyName>
     <RootNamespace>DigitalFUHubApi</RootNamespace>
+    <UserSecretsId>43bc6f80-128c-4f28-afc1-3d0333af2151</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

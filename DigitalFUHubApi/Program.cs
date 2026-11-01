@@ -179,83 +179,8 @@ namespace DigitalFUHubApi
 			builder.Services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
 
 
-			// add job scheduler
-
-			builder.Services.AddQuartz(configure =>
-			{
-				configure.UseMicrosoftDependencyInjectionJobFactory();
-			});
-
-			builder.Services.AddQuartzHostedService(options =>
-			{
-				options.WaitForJobsToComplete = true;
-			});
-			
-			builder.Services.AddQuartz(configure =>
-			{
-				var jobKeyGetSessionIdMbBankJob = new JobKey("GetSessionIdMbBankJob");
-				configure.AddJob<GetSessionIdMbBankJob>(jobKeyGetSessionIdMbBankJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyGetSessionIdMbBankJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule => 
-								schedule.WithIntervalInMinutes(25).RepeatForever()
-								)
-							);
-
-				var jobKeyHistoryTransactionMbBankJob = new JobKey("HistoryTransactionMbBankJob");
-				configure.AddJob<HistoryTransactionMbBankJob>(jobKeyHistoryTransactionMbBankJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyHistoryTransactionMbBankJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule => 
-								schedule.WithIntervalInSeconds(61).RepeatForever()
-								)
-							);
-
-				var jobKeyHistoryDepositTransactionMbBankJob = new JobKey("HistoryDepositTransactionMbBankJob");
-				configure.AddJob<HistoryDepositTransactionMbBankJob>(jobKeyHistoryDepositTransactionMbBankJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyHistoryDepositTransactionMbBankJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule => 
-								schedule.WithIntervalInSeconds(111).RepeatForever()
-								)
-							);
-
-				var jobKeyHistoryWithdrawTransactionMbBankJob = new JobKey("HistoryWithdrawTransactionMbBankJob");
-				configure.AddJob<HistoryWithdrawTransactionMbBankJob>(jobKeyHistoryWithdrawTransactionMbBankJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyHistoryWithdrawTransactionMbBankJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule => 
-								schedule.WithIntervalInSeconds(183).RepeatForever()
-								)
-							);
-
-
-				var jobKeyOrderStatusJob = new JobKey("OrderStatusJob");
-				configure.AddJob<OrderStatusJob>(jobKeyOrderStatusJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyOrderStatusJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule => 
-								schedule.WithIntervalInMinutes(30).RepeatForever()
-								)
-							);
-
-				var jobKeyUpdateStatusRequestDepositMoneyToExpiredJob = new JobKey("UpdateStatusRequestDepositMoneyToExpired");
-				configure.AddJob<UpdateStatusRequestDepositMoneyToExpired>(jobKeyUpdateStatusRequestDepositMoneyToExpiredJob)
-						 .AddTrigger(trigger =>
-							trigger.ForJob(jobKeyUpdateStatusRequestDepositMoneyToExpiredJob)
-							.StartNow()
-							.WithSimpleSchedule(schedule =>
-								schedule.WithIntervalInHours(24).RepeatForever()
-								)
-							);
-
-				configure.UseMicrosoftDependencyInjectionJobFactory();
-			});
+			// Quartz jobs, each enabled/disabled by "Jobs" in appsettings.json
+			builder.Services.AddJobServices(builder.Configuration);
 
 
 			var app = builder.Build();
