@@ -1,0 +1,33 @@
+name: CI
+
+# Build check only. This workflow has no secrets and never deploys.
+on:
+  pull_request:
+  push:
+    branches: [main, "2026/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore
+        run: dotnet restore DigitalFUHub.sln
+
+      - name: Build
+        run: dotnet build DigitalFUHub.sln -c Release --no-restore
+
+      # No test projects yet - add `dotnet test` here when they exist
