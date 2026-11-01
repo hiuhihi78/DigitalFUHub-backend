@@ -1,0 +1,141 @@
+=====================================================================
+ DigitalFUHub - Manual Database Migration Guide (EF Core)
+=====================================================================
+
+Migrations live in the  BusinessObject  project.
+DigitalFUHubApi  is the startup project (it provides appsettings.json
+and the connection string).
+
+
+---------------------------------------------------------------------
+1. ONE-TIME SETUP
+---------------------------------------------------------------------
+
+  dotnet tool install --global dotnet-ef
+  (or update:  dotnet tool update --global dotnet-ef)
+
+  dotnet ef --version        -> check it works
+
+Microsoft.EntityFrameworkCore.Design is already referenced in
+DigitalFUHubApi.csproj - nothing else to install.
+
+
+---------------------------------------------------------------------
+2. WHICH DATABASE WILL BE MIGRATED?
+---------------------------------------------------------------------
+
+EF reads DigitalFUHubApi/appsettings.json exactly like the app does:
+
+  1. "Cloud" chooses the section: "AWS" or "Azure"
+  2. That section's "DbConnectionString" is used
+  3. If it is empty -> falls back to ConnectionStrings:DB
+
+  Target              What to set in appsettings.json
+  ------------------  ----------------------------------------------
+  RDS (AWS)           "Cloud": "AWS"
+                      AWS:DbConnectionString = RDS connection string
+  Azure SQL           "Cloud": "Azure"
+                      Azure:DbConnectionString = Azure SQL conn string
+  Local SQL Server    Leave the selected section's DbConnectionString
+                      empty -> ConnectionStrings:DB is used
+
+NOTE: the selected provider's other required settings must also be
+filled in (for AWS: Region, S3BucketName), because EF runs the app's
+startup configuration, which validates them.
+
+ALWAYS check the target first with "migrations list" (section 3) -
+the log shows which server it connects to.
+
+
+---------------------------------------------------------------------
+3. COMMANDS
+---------------------------------------------------------------------
+
+Run all commands from the backend folder:
+
+  cd "D:\FU\Capstone Project\1. Source\backend"
+
+  -p = project that contains the migrations (BusinessObject)
+  -s = startup project that provides config  (DigitalFUHubApi)
+
+Show migrations and which are pending:
+  dotnet ef migrations list -p BusinessObject -s DigitalFUHubApi
+
+Apply all pending migrations:
+  dotnet ef database update -p BusinessObject -s DigitalFUHubApi
+
+Create a new migration (after changing entities):
+  dotnet ef migrations add <Name> -p BusinessObject -s DigitalFUHubApi
+
+Remove the last migration (ONLY if it is NOT applied yet):
+  dotnet ef migrations remove -p BusinessObject -s DigitalFUHubApi
+
+Roll the database back to an earlier migration:
+  dotnet ef database update <MigrationName> -p BusinessObject -s DigitalFUHubApi
+  (e.g. version-2)
+
+Drop the whole database  (!! DANGEROUS - deletes all data !!):
+  dotnet ef database drop -p BusinessObject -s DigitalFUHubApi
+
+
+Typical workflow when you change an entity:
+  1. dotnet ef migrations add version-4 -p BusinessObject -s DigitalFUHubApi
+  2. Review the new file in BusinessObject/Migrations
+  3. dotnet ef database update -p BusinessObject -s DigitalFUHubApi
+  4. Commit the BusinessObject/Migrations changes
+
+
+---------------------------------------------------------------------
+4. ALTERNATIVE: GENERATE A SQL SCRIPT (safest for production)
+---------------------------------------------------------------------
+
+  dotnet ef migrations script --idempotent -o migrate.sql -p BusinessObject -s DigitalFUHubApi
+
+Then run migrate.sql yourself in SSMS / Azure Data Studio.
+
+  --idempotent : the script checks which migrations are already
+                 applied, so it is safe to run against any database.
+
+  The script does NOT create the database - create an empty
+  "DigitalFuHub" database first.
+
+
+---------------------------------------------------------------------
+5. ALTERNATIVE: VISUAL STUDIO PACKAGE MANAGER CONSOLE
+---------------------------------------------------------------------
+
+Tools -> NuGet Package Manager -> Package Manager Console
+Set "Default project" = BusinessObject, then:
+
+  Get-Migration           -StartupProject DigitalFUHubApi
+  Update-Database         -StartupProject DigitalFUHubApi
+  Add-Migration version-4 -StartupProject DigitalFUHubApi
+
+
+---------------------------------------------------------------------
+6. TROUBLESHOOTING
+---------------------------------------------------------------------
+
+Error: "doesn't reference Microsoft.EntityFrameworkCore.Design"
+  -> Run from the backend folder with -s DigitalFUHubApi.
+     The package must stay in DigitalFUHubApi.csproj.
+
+Error: "The process cannot access the file ... being used by another
+process"
+  -> The API is running and locking bin/. Stop it first,
+     or add --no-build if you have already built.
+
+Error: timeout / "A network-related ... error" (RDS)
+  -> Check the RDS security group allows port 1433 from your current
+     IP (your IP may have changed) and "Public access" is Yes.
+
+Error: "Login failed for user"
+  -> Wrong username/password in DbConnectionString.
+
+Error: 'Invalid "Cloud" setting' or 'settings are missing'
+  -> Fix appsettings.json - the message names the exact key.
+
+Lots of dbug:/info: log lines
+  -> Normal: DatabaseContext has LogTo(Console.WriteLine) enabled.
+     Look for "Done." at the end, then run "migrations list" and
+     confirm nothing shows "(Pending)".
