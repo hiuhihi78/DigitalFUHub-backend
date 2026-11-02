@@ -17,6 +17,8 @@ COPY DigitalFUHubApi/DigitalFUHubApi.csproj DigitalFUHubApi/
 RUN dotnet restore DigitalFUHubApi/DigitalFUHubApi.csproj -r linux-x64
 
 COPY . .
+# The bundle command does not create the output folder
+RUN mkdir -p /app
 RUN dotnet ef migrations bundle \
         --project BusinessObject \
         --startup-project DigitalFUHubApi \
