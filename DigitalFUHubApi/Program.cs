@@ -24,6 +24,9 @@ namespace DigitalFUHubApi
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
+			// Local secrets for development (git- and docker-ignored); servers use environment variables
+			builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 			// Add services to the container.
 
 			builder.Services.AddControllers();
@@ -37,6 +40,7 @@ namespace DigitalFUHubApi
 			{
 				opts.UseSqlServer(DatabaseContext.ConnectionString);
 			});
+			builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
 
 			// Add HttpContextAccessor 
 			builder.Services.AddHttpContextAccessor();
@@ -208,6 +212,7 @@ namespace DigitalFUHubApi
 				endpoints.MapHub<UserOnlineStatusHub>("/hubs/userOnlineStatus");
 				endpoints.MapHub<NotificationHub>("/hubs/notification");
 				endpoints.MapHub<ChatHub>("/hubs/chat");
+				endpoints.MapHealthChecks("/health");
 			});
 
 			// Add https

@@ -35,3 +35,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Local secrets (see DigitalFUHubApi/appsettings.json for the keys)
+appsettings.Local.json

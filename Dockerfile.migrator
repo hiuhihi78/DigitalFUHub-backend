@@ -1,0 +1,33 @@
+# Database migrator: an EF Core migration bundle that applies pending migrations and exits.
+# Started by the deploy pipeline only when "run migrations" is chosen.
+# Needs the same settings as the API (Cloud + {Cloud}__DbConnectionString), passed as env vars.
+
+# ---------- Build ----------
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+RUN dotnet tool install --global dotnet-ef --version 6.0.36
+ENV PATH="$PATH:/root/.dotnet/tools"
+WORKDIR /src
+
+# Restore first (cached unless a .csproj changes)
+COPY BusinessObject/BusinessObject.csproj BusinessObject/
+COPY Comons/Comons.csproj Comons/
+COPY DataAccess/DataAccess.csproj DataAccess/
+COPY DTOs/DTOs.csproj DTOs/
+COPY DigitalFUHubApi/DigitalFUHubApi.csproj DigitalFUHubApi/
+RUN dotnet restore DigitalFUHubApi/DigitalFUHubApi.csproj -r linux-x64
+
+COPY . .
+RUN dotnet ef migrations bundle \
+        --project BusinessObject \
+        --startup-project DigitalFUHubApi \
+        --configuration Release \
+        --runtime linux-x64 --self-contained \
+        --output /app/efbundle
+
+# ---------- Runtime ----------
+FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
+WORKDIR /app
+COPY --from=build /app/efbundle .
+# Non-secret defaults (Cloud, ...) - secrets come from the environment
+COPY DigitalFUHubApi/appsettings.json .
+ENTRYPOINT ["./efbundle"]
