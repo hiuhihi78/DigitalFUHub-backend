@@ -1,12 +1,13 @@
 name: CI
 
-# PR / branch push: build check.
-# Push to main: also publish images to ghcr.io (tag sha-<7 chars>).
+# PR into main: build check.
+# Push to main (= PR merged): build + publish images to ghcr.io (tag sha-<7 chars>).
 # Never deploys - production is deployed from the DigitalFUHub repo.
 on:
   pull_request:
+    branches: [main]
   push:
-    branches: [main, "2026/**"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
